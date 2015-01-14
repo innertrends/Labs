@@ -74,19 +74,21 @@ class Compass
 	 * @param string $pubk
 	 * @param string $privk
 	 */
-	public function __construct($pubk="",$privk="")
+	public function __construct($pubk="",$privk="",$version="")
 	{
 		/**
 		 * Check for global configurations
 		 */
 		if(defined("IT_COMPASS_PUBLIC_KEY")) $this->public_key =IT_COMPASS_PUBLIC_KEY; 
 		if(defined("IT_COMPASS_PRIVATE_KEY")) $this->private_key =IT_COMPASS_PRIVATE_KEY;
+		if(defined("IT_COMPASS_VERSION")) $this->version =IT_COMPASS_VERSION;
 		
 		/**
 		 * set/overwrite keys
 		 */
 		if( $pubk!="" ) $this->public_key =$pubk; 
 		if( $privk!="" ) $this->private_key =$privk;
+		if( $version!="" ) $this->version =$version;
 		 
 	}
 	
