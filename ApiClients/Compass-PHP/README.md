@@ -98,3 +98,6 @@ $client->setPublicKey($public_key);
  
  $records=$client->getReports($data);
 ```
+Support
+-------------------
+If you have any questions, bugs, or suggestions, please report them via Github Issues.  
