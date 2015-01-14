@@ -79,9 +79,9 @@ $client->setPublicKey($public_key);
 				      
  	$client->log("error","register",$event_data);
 ``` 	
-###### Extract last records from the  logbook: 17, report: 81
+###### Extract last records from the  logbook: 17 
 ```php 
- $data=array("rid"=>81,"lid"=>17)  
+ $data=array( "lid"=>17)  
  
  $records=$client->getReports($data);
 ```
@@ -89,7 +89,7 @@ $client->setPublicKey($public_key);
 ###### Extract last records from the  logbook: 17, report: 81 with an extra filter:
        user that matches exactly an email address
 ```php 
- $data=array("rid"=>81,"lid"=>17,
+ $data=array("lid"=>17,"rid"=>81,
  		     "filters"=>array("include"=>
  		     		           array("user"=>array("matches_exactly"=>"user@domain.com")
  		     		 		)
