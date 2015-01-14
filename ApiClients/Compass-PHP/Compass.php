@@ -178,8 +178,8 @@ class Compass
 		 		}
 		 	}
 		 	
-            //$id="&itp_itid=$email";
-			$terminal.="?_itkey=$this->public_key&itp_ittype=$type&itp_itval=$event".$cvars;
+             
+		    $terminal.="?_itkey=$this->public_key&itp_ittype=$type&itp_itval=$event".$cvars;
 		    $request['url']=$terminal;
 		    $request['type']="get";
 		    $request['op']="log";
@@ -203,7 +203,7 @@ class Compass
 			if(isset($query['filters']) and is_array($query['filters']) )
 				$query['filters']="filters=".urlencode(json_encode($query['filters']));
 			
-			if($builder['access']=="reports"){
+			if($builder['access']=="stream" or $builder['access']=="reports"){
 			    if(isset($builder['lid']) and $builder['lid']>0) $path="logbooks/".$builder['lid'];
 			    if(isset($builder['rid']) and $builder['rid']>0 and $path!="") $path.="/reports/".$builder['rid'];
 			   
