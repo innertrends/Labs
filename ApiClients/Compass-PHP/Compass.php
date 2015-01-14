@@ -263,7 +263,7 @@ class Compass
 	
 	/**
 	 * Compose and send the request from the called method
-	 *  * format: getMethod,createMethod,updateMethod -> concrete: getReports(array)
+	 *  * format: getMethod,createMethod,updateMethod -> concrete: getStream(array)
 	 *  
 	 * @param string $method
 	 * @param array $args
