@@ -78,12 +78,25 @@ $client->setPublicKey($public_key);
 				            );
 				      
  	$client->log("error","register",$event_data);
-``` 	
+``` 
+
+######  List all logbooks accessible for the current account
+```php  
+
+ $logbooks=$client->listLogbooks();
+```
+
+######  List all reports accessible for the current account, bound to a logbook
+```php  
+ $data=array("lid"=>17);
+ $reports=$client->listReports($data);
+```
+
 ###### Extract last records from the  logbook: 17 
 ```php 
  $data=array( "lid"=>17)  
  
- $records=$client->getReports($data);
+ $records=$client->getStream($data);
 ```
 
 ###### Extract last records from the  logbook: 17, report: 81 with an extra filter:
@@ -96,7 +109,7 @@ $client->setPublicKey($public_key);
             )
  		); 
  
- $records=$client->getReports($data);
+ $records=$client->getStream($data);
 ```
 Support
 -------------------
