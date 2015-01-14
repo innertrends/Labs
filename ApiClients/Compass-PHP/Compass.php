@@ -21,7 +21,7 @@ class Compass
 	 * Communication endpoint url
 	 * @var string
 	 */
-	private $endpoint="compass-alfa.innertrends.com";
+	private $endpoint="compass.innertrends.com";
 	
  
 	
