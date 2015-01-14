@@ -1,6 +1,6 @@
  InnerTrends PHP Client Library
 ===================
- This wrapper lets developers interact with the InnerTrends API, allowing them to store event logs such as errors and action. 
+ This wrapper lets developers interact with the InnerTrends API, allowing them to store event logs such as errors and actions. 
  The API also facilitates the interogation of their formed logs database by using a slick sintax.
                                         
  Requirements
@@ -78,15 +78,16 @@ $client->setPublicKey($public_key);
 				            );
 				      
  	$client->log("error","register",$event_data);
- 	
- 	###### Extract last records from the  logbook: 17, report: 81
+``` 	
+###### Extract last records from the  logbook: 17, report: 81
 ```php 
  $data=array("rid"=>81,"lid"=>17)  
  
  $records=$client->getReports($data);
 ```
 
- 	###### Extract last records from the  logbook: 17, report: 81 with an extra filter: user that matches exactly an email address
+###### Extract last records from the  logbook: 17, report: 81 with an extra filter:
+       user that matches exactly an email address
 ```php 
  $data=array("rid"=>81,"lid"=>17,
  		     "filters"=>array("include"=>
