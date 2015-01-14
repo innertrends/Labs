@@ -118,6 +118,17 @@ class Compass
 		return $this;
 	}
 	
+		
+	/**
+	 * Setter for the api version
+	 * @param string $v
+	 * @return Compass
+	 */
+	public function setVersion($v=""){
+		$this->version=$v;
+		return $this;
+	}
+	
 	/**
 	 * Setter for  the output format 
 	 * @param string $format
