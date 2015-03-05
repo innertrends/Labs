@@ -49,6 +49,15 @@ event data | true | the event data, an object of contextual data for the current
   or
  ```  _itl.log(event); ```
  
+  When storing a log we usually want to relate it to an active user. To create this connection we can use two methods:
+  1. in the event_data object you must add the special key "_identity" that will hold the user identifier
+  2. call the "log" method with the "identity" event: 
+      ```  _itl.log("identity","user identifier"); ```
+     by using this method, all the subsequent log request will be bound to this user
+     To cancel the identity for the next log event the "no_identity" event must be called:
+     ```  _itl.log("no_dentity"); ```
+     note: the "_identity" special key, from the event_data, will overwrite the for the current request the globally set user       
+ 
  
  To query the logs database you must use the "stream" method   which accepts 1 parameter:
 
@@ -66,14 +75,19 @@ user | filter the data by this specific user (with respect with the format used 
 filters | an object of filters that's applied upond the selected data (rid,lid)
 callback | a function that gets triggered when the request is finished -it's fed with a response object-. The function is usable in all formats
  
- ###### Valid methods of using the stream function
+###### Valid methods of using the stream function
  
 ``` _itl.stream({lid:2}); ```
 or
  ``` _itl.stream({lid:2,rid:12}); ```
 or
  ``` _itl.stream({lid:2,rid:12,user:uid}); ```
-or
+
+ Examples
+-----
+
+###### Collect all data from the logbook id 2, report id 12:
+
  ```js
  _itl.stream({lid:2,rid:12,callback:function(msg){
            if(msg.status=="ok"){
@@ -85,6 +99,29 @@ or
       }}); 
  ```
 
+###### Collect all data from the logbook id 2 filtered by the user id xxxxx:
+
+ ```js
+ _itl.stream({lid:2,user:"xxxxxx",callback:function(msg){
+           if(msg.status=="ok"){
+              console.log(msg.data);
+           }
+           else
+           {
+           }
+      }}); 
+ ```
+ 
+###### Store an error log:
+
+ ```js
+_itl.log("error","user warning",{error:"A problem occurred",section:"campaign",context:document.location.href});
+ ```
+###### Store an buy event:
+
+ ```js
+_itl.log("buy",{product:"spaceship",amount:2,price:200000,section:"cart",_identity:"userid"});
+ ```
  
  Support
 -------------------
