@@ -33,6 +33,10 @@
 			  fquery+="?filters="+encodeURIComponent(JSON.stringify(query.filters));
 		   }
 		   
+		   if(query.citj) fquery+=(fquery.indexOf("?")==-1?"?":"&")+"citj="+query.citj ; 
+		   if(query.user) fquery+=(fquery.indexOf("?")==-1?"?":"&")+"user="+query.user ;
+		   		 
+		   
 		   if(!fquery.callback) fquery.callback=function(){};
 		    
                    
