@@ -56,7 +56,7 @@ event data | true | the event data, an object of contextual data for the current
      by using this method, all the subsequent log request will be bound to this user
      To cancel the identity for the next log event the "no_identity" event must be called:
      ```  _itl.log("no_dentity"); ```
-     note: the "_identity" special key, from the event_data, will overwrite the for the current request the globally set user       
+     note: the "_identity" special key, from the event_data, will overwrite  for the current request the globally set user       
  
  
  To query the logs database you must use the "stream" method   which accepts 1 parameter:
