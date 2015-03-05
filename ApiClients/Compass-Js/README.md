@@ -50,7 +50,7 @@ event data | true | the event data, an object of contextual data for the current
  ```  _itl.log(event); ```
  
  
- To query the logs database you must use the "stream" method   which accepts 1 parameters:
+ To query the logs database you must use the "stream" method   which accepts 1 parameter:
 
 Parameter | Optional | Description
 --- | --- | ---
@@ -62,19 +62,18 @@ query | false | an object that configures the query request
 --- | ---
 lid | the logbook id (mandatory if no citj exists)
 rid | the report id. to use the report id the lid is mandatory
-user | filter the data by this specific user (with respect with the format used by you). The user can be encrypted for a more secure exchage of fata (suggested method)
-filters | an object of filters that's applied upond the selected data (rid,lid or citj)
-citj | a custom InnerTrens job id
+user | filter the data by this specific user (with respect with the format used by you). The user can be encrypted for a more secure exchage of data (suggested method)
+filters | an object of filters that's applied upond the selected data (rid,lid)
 callback | a function that gets triggered when the request is finished -it's fed with a response object-. The function is usable in all formats
  
  ###### Valid methods of using the stream function
-
+ 
 ``` _itl.stream({lid:2}); ```
- or
+or
  ``` _itl.stream({lid:2,rid:12}); ```
-  or
+or
  ``` _itl.stream({lid:2,rid:12,user:uid}); ```
- or
+or
  ```js
  _itl.stream({lid:2,rid:12,callback:function(msg){
            if(msg.status=="ok"){
@@ -85,5 +84,8 @@ callback | a function that gets triggered when the request is finished -it's fed
            }
       }}); 
  ```
-   or
- ``` _itl.stream({citj:"custom_id"}); ```
+
+ 
+ Support
+-------------------
+If you have any questions, bugs, or suggestions, please report them via Github Issues.  
