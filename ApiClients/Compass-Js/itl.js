@@ -86,12 +86,12 @@
 		   
 		     var build="_itkey="+cfg.key;
 		     
-		     if(p==null){
-		    	 p=b;
+		      if(b==null){
 		    	 b=l;
 		    	 l=null; 
 		     }
-		     else  if(p==null && b==null){
+		     else  if(typeof b=="object"){
+		    	 p=b;
 		    	 b=l;
 		    	 l=null;
 		     }
