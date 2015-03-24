@@ -99,6 +99,12 @@ $client->setPublicKey($public_key);
  $records=$client->getStream($data);
 ```
 
+###### Return the number of entries in the   logbook: 17 
+```php 
+ $data=array( "lid"=>17,"filters"=>array("operator"=>"count"));
+ $records=$client->getStream($data);
+```
+
 ###### Extract last records from the  logbook: 17, report: 81 with an extra filter:
        user that matches exactly an email address
 ```php 
