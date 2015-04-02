@@ -8,7 +8,7 @@
  * @link		http://api.innertrends.com/ 
  */
 
-class Compass
+class CompassApi
 {
 	/**
 	 * Api version 
