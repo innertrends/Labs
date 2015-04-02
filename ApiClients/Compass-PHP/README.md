@@ -46,14 +46,14 @@ event data | true | the event data, an array of contextual data for the current 
  
 ###### Instantiating the Client Library:
 ```php
-$client= new Compass();
+$client= new CompassApi();
 //or
-$client= new Compass($public_key,$private_key,$version);
+$client= new CompassApi($public_key,$private_key,$version);
 ```
 
 ###### Configuring the Library by using the setters
 ```php
-$client= new Compass();
+$client= new CompassApi();
 $client->setPrivateKey($private_key);
 $client->setPublicKey($public_key); 
 ```
