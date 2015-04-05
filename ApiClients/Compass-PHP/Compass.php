@@ -149,36 +149,23 @@ class CompassApi
 	 */
 	private function buildRequest($builder=array()){
  		
-		if($builder['op']=="log"){
+	if($builder['op']=="action" or $builder['op']=="error"){
 	
-			/**
-			 * Compose endpoint
-			 * @var string
-			 */
-			$terminal=(($this->secure) ? 'https' : 'http').'://'.$this->collect_endpoint;
-			
+			$terminal=(($this->secure) ? 'https' : 'http').'://'.$this->collect_endpoint;			
 		 	
-			$type="action";$cvars="";$event="";$cvi=1;	
-		 	
-		 	if(sizeof($builder['query'])==3 or (sizeof($builder['query'])==2 and !is_array($builder['query'][1])))
-		 	{
-		 		$type=$builder['query'][0];
-		 		$event=$builder['query'][1];
-		 		$cvi=2;
-		 	}
-		 	else $event=$builder['query'][0];
-		 	
-		 	if(is_array($builder['query'][$cvi])){ 
-		 		foreach( $builder['query'][$cvi] as $k => $p){
+			$type=$builder['op'];$cvars="";$event="";
+		 	 
+                        if(isset($builder['_event'])) $event=$builder['_event'];
+		 	unset($builder['op'],$builder['event']);
+                   
+		 	if(!empty($builder)){ 
+		 		foreach( $builder as $k => $p){
 		 			if($k=="_identity")  $k="&itp_itid";
-		 			else if($k=="_type")  $k="&itp_type";
-		 			else $k="&itp_".$k;
-		 			
+		 			else $k="&itp_".$k; 
 		 			$cvars.=$k."=".urlencode($p);
 		 		}
-		 	}
-		 	
-             
+		 	} 
+	 
 		    $terminal.="?_itkey=$this->public_key&itp_ittype=$type&itp_itval=$event".$cvars;
 		    $request['url']=$terminal;
 		    $request['type']="get";
@@ -297,12 +284,11 @@ class CompassApi
         else
         {
         	/**
-        	 * Send a log to colletor endpoint
+        	 * Send a action or error log to colletor endpoint
         	 */
-        	if($method=="log"){
-        		$builder['op']="log";
-        		$builder['query']=$args;
-        		$request=$this->buildRequest($builder);
+        	if($method=="action" or $method=="error"){
+        		$args[0]['op']=$method;
+        		$request=$this->buildRequest($args[0]);
         	}
         }
 		
