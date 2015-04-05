@@ -25,28 +25,34 @@ IT_COMPASS_PUBLIC_KEY | Public key
 IT_COMPASS_PRIVATE_KEY | Private key
 IT_COMPASS_VERSION | The api version
 
-To send a log to InnerTrends the "log" method has to be used, which accepts 3 parameters:
+To send a log to InnerTrends the "action"/ "error" method has to be used, which accepts just one parameter:
 
 Parameter | Optional | Description
 --- | --- | ---
-type | true | determines the event type. Innertrends supports 2 types: action, error. If the type is not set it defaults to "action"
-event | false | the event name
+ 
 event data | true | the event data, an array of contextual data for the current event
 
-###### Valid methods of using the log function
+######  sending a log
 
-```  $client->log($type,$event,$event_data); ```
+```  $client->action($event_data); ```
  or
- ```  $client->log($event,$event_data); ```
-  or
- ```  $client->log($event); ```
+ ``` $client->error($event_data); ```
+ 
+ The '$event_data' is a 'key -> value' array that holds all the contextual data of the event; the keys hold the name of the event member, and the value  their description.
+ We do have a few special key that should and can be used only in the intended puposes:
+ 
+ Key | Optional | Description
+--- | --- | ---
+ 
+_event | true | this designates the current event name. The name of the entire context. If not set, the default will be set to 'other'
+_identity | true | the subject of the event. The actual user. The format is of your choosing, it can be an email address or anykind of string with which you can identify him.
  
  Examples
 -----
  
 ###### Instantiating the Client Library:
 ```php
-$client= new CompassApi();
+$client= new CompassApi(); // if it takes the configuration from the global constants
 //or
 $client= new CompassApi($public_key,$private_key,$version);
 ```
@@ -60,24 +66,13 @@ $client->setPublicKey($public_key);
 
 ###### Sending an action event to IT
 ```php
-    $data=array("Section"=>"account", 
-				            "Website"=>"http://somesite.com",
-				            "Name"=>"Jon Doe" 
-				            );
-				      
-	$client->log("register",$event_data);
-	//or
-	$client->log("action","register",$event_data);
+    		      
+ $client->action(array("_event"=>"register","Website"=>"http://somesite.com","Name"=>"Jon Doe" ));
 ```
 
 ###### Sending an error event to IT
 ```php
-    $data=array("Section"=>"account", 
-				            "fault"=>"invalid email address supplied",
-				            "email"=>"jondoe@test" 
-				            );
-				      
- 	$client->log("error","register",$event_data);
+ 	$client->error(array("_event"=>"register","_identity"=>"user@site.com","fault"=>"invalid email address supplied" ));
 ``` 
 
 ######  List all logbooks accessible for the current account
@@ -88,21 +83,17 @@ $client->setPublicKey($public_key);
 
 ######  List all reports accessible for the current account, bound to a logbook
 ```php  
- $data=array("lid"=>17);
- $reports=$client->listReports($data);
+ $reports=$client->listReports(array("lid"=>17));
 ```
 
 ###### Extract last records from the  logbook: 17 
 ```php 
- $data=array( "lid"=>17)  
- 
- $records=$client->getStream($data);
+ $records=$client->getStream(array( "lid"=>17));
 ```
 
 ###### Return the number of entries in the   logbook: 17 
 ```php 
- $data=array( "lid"=>17,"filters"=>array("operator"=>"count"));
- $records=$client->getStream($data);
+ $records=$client->getStream(array( "lid"=>17,"filters"=>array("operator"=>"count")));
 ```
 
 ###### Extract last records from the  logbook: 17, report: 81 with an extra filter:
