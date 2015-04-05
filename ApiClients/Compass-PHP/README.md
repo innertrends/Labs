@@ -43,9 +43,8 @@ event data | true | the event data, an array of contextual data for the current 
  
  Key | Optional | Description
 --- | --- | ---
- 
-_event | true | this designates the current event name. The name of the entire context. If not set, the default will be set to 'other'
-_identity | true | the subject of the event. The actual user. The format is of your choosing, it can be an email address or anykind of string with which you can identify him.
+_event | true | this designates the current event name. The name of the entire context. If not set, the default                    will be set to 'other'
+_identity | true | the subject of the event. The actual user. The format is of your choosing, it can be an email                    address or anykind of string with which you can identify him.
  
  Examples
 -----
