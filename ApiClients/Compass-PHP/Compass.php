@@ -157,7 +157,7 @@ class CompassApi
 		 	 
                         if(isset($builder['_event'])) $event=$builder['_event'];
 		 	unset($builder['op'],$builder['event']);
-                   
+                        $event= urlencode($event);
 		 	if(!empty($builder)){ 
 		 		foreach( $builder as $k => $p){
 		 			if($k=="_identity")  $k="&itp_itid";
