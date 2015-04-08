@@ -7,304 +7,452 @@
  * @author		Alex Stoia
  * @link		http://api.innertrends.com/ 
  */
+class CompassApi {
 
-class CompassApi
-{
-	/**
-	 * Api version 
-	 * 
-	 * @var string
-	 */
-	private $version = '1.0';
-	
-	/**
-	 * Communication endpoint url
-	 * @var string
-	 */
-	private $endpoint="compass.innertrends.com";
-	
- 
-	
-	/**
-	 * Data collection endpoin
-	 * @var string
-	 */
-	private $collect_endpoint="babel.innertrends.com/store";
-	
-	/**
-	 * Output format
-	 *  * json
-	 *  * xml
-	 *  
-	 * @var string
-	 */
-	private $output = 'json'; 
+    /**
+     * Api version 
+     * 
+     * @var string
+     */
+    private $version = '1.0';
+
+    /**
+     * Communication endpoint url
+     * @var string
+     */
+    private $endpoint = "compass.innertrends.com";
+
+    /**
+     * Data collection endpoin
+     * @var string
+     */
+    private $collect_endpoint = "babel.innertrends.com/store";
+  
+    /**
+     * Stores erros at wrapper level
+     * 
+     * @var array
+     */
+    private $errors=array();
     
-	/**
-	 * Communicat through secure protocol, or not
-	 * 
-	 * @var Boolean
-	 */
-	private $secure = true;
- 
-	/**
-	 * Your developer private api key
-	 * !used for read operations
-	 * @var string
-	 */
-	private $private_key = ''; 
-	
-	/**
-	 * Your developer public api key
-	 * !used for write operations
-	 * @var string
-	 */
-	private $public_key = '';
-	
-	/**
-	 * If this is on, request data payload gets printed
-	 * 
-	 * @var Boolean
-	 */
-	private $debug=false;
- 
-	 
-	/**
-	 * Initiate
-	 * @param string $pubk
-	 * @param string $privk
-	 */
-	public function __construct($pubk="",$privk="",$version="")
-	{
-		/**
-		 * Check for global configurations
-		 */
-		if(defined("IT_COMPASS_PUBLIC_KEY")) $this->public_key =IT_COMPASS_PUBLIC_KEY; 
-		if(defined("IT_COMPASS_PRIVATE_KEY")) $this->private_key =IT_COMPASS_PRIVATE_KEY;
-		if(defined("IT_COMPASS_VERSION")) $this->version =IT_COMPASS_VERSION;
-		
-		/**
-		 * set/overwrite keys
-		 */
-		if( $pubk!="" ) $this->public_key =$pubk; 
-		if( $privk!="" ) $this->private_key =$privk;
-		if( $version!="" ) $this->version =$version;
-		 
-	}
-	
-	/**
-	 * Activate debug mode;
-	 */
-	public function debug(){
-		$this->debug=true;
-		return $this;
-	}
-	
-	/**
-	 * Setter for the public key
-	 * @param string $key
-	 */
-	public function setPublicKey($key=""){
-		$this->public_key=$key;
-		
-		return $this;
-	}
-	
-	/**
-	 * Setter for the private key
-	 * @param string $key
-	 */
-	public function setPrivateKey($key=""){
-		$this->private_key=$key;
-	
-		return $this;
-	}
-	
-		
-	/**
-	 * Setter for the api version
-	 * @param string $v
-	 * @return Compass
-	 */
-	public function setVersion($v=""){
-		$this->version=$v;
-		return $this;
-	}
-	
-	/**
-	 * Setter for  the output format 
-	 * @param string $format
-	 */
-	public function setOutputFormat($format="json"){
-		$this->output=$format;
-		
-		return $this;
-	}
+    /**
+     * Output format
+     *  * json
+     *  * xml
+     *  
+     * @var string
+     */
+    private $output = 'json';
+
+    /**
+     * Communicat through secure protocol, or not
+     * 
+     * @var Boolean
+     */
+    private $secure = true;
+
+    /**
+     * Your developer private api key
+     * !used for read operations
+     * @var string
+     */
+    private  $private_key = '';
+
+    /**
+     * Your developer public api key
+     * !used for write operations
+     * @var string
+     */
+    private $public_key = '';
+
+    /**
+     * If this is on, request data payload gets printed
+     * 
+     * @var Boolean
+     */
+    private $debug = false;
+
+    /**
+     * Holds the instantiated self
+     */
+    private static $instance = null;
+
+    /**
+     * Initiate
+     * @param string $pubk
+     * @param string $privk
+     */
+    public function __construct($pubk = "", $privk = "", $version = "") {
+        /**
+         * Check for global configurations
+         */
+        if (defined("IT_COMPASS_PUBLIC_KEY"))
+            $this->public_key = IT_COMPASS_PUBLIC_KEY;
+        if (defined("IT_COMPASS_PRIVATE_KEY"))
+            $this->private_key = IT_COMPASS_PRIVATE_KEY;
+        if (defined("IT_COMPASS_VERSION"))
+            $this->version = IT_COMPASS_VERSION;
+
+        /**
+         * set/overwrite keys
+         */
+        if ($pubk != "")
+            $this->public_key = $pubk;
+        if ($privk != "")
+            $this->private_key = $privk;
+        if ($version != "")
+            $this->version = $version;
+    }
+
+    /**
+     * Activate debug mode;
+     */
+    public function setDebug($d=true) {
+        $this->debug = $d;
+        return $this;
+    }
+
+    /**
+     * Setter for the public key
+     * @param string $key
+     */
+    public function setPublicKey($key = "") {
+        $this->public_key = $key;
+
+        return $this;
+    }
+
+    /**
+     * Setter for the private key
+     * @param string $key
+     */
+    public function setPrivateKey($key = "") {
+        $this->private_key = $key;
+
+        return $this;
+    }
     
-	/**
-	 * Formatting the data to be send ready
-	 * 
-	 * @param array $builder
-	 * @return array
-	 */
-	private function buildRequest($builder=array()){
- 		
-	if($builder['op']=="action" or $builder['op']=="error"){
-	
-			$terminal=(($this->secure) ? 'https' : 'http').'://'.$this->collect_endpoint;			
-		 	
-			$type=$builder['op'];$cvars="";$event="";
-		 	 
-                        if(isset($builder['_event'])) $event=$builder['_event'];
-		 	unset($builder['op'],$builder['event']);
-                        $event= urlencode($event);
-		 	if(!empty($builder)){ 
-		 		foreach( $builder as $k => $p){
-		 			if($k=="_identity")  $k="&itp_itid";
-		 			else $k="&itp_".$k; 
-		 			$cvars.=$k."=".urlencode($p);
-		 		}
-		 	} 
-	 
-		    $terminal.="?_itkey=$this->public_key&itp_ittype=$type&itp_itval=$event".$cvars;
-		    $request['url']=$terminal;
-		    $request['type']="get";
-		    $request['op']="log";
-		}
-		else{
-			
-			$terminal=(($this->secure) ? 'https' : 'http').'://'.$this->endpoint.'/atlas/'.$this->version.'';
-			 
-			if($builder['op']=="get" or $builder['op']=="list"){
-			    $request['type']="get";
-			}
-			else
-			{
-				$request['type']="post";
-			}
-			
-			$query=$builder;
-			
-			unset($query['op'],$query['access']);
-			
-			if(isset($query['filters']) and is_array($query['filters']) )
-				$query['filters']="filters=".urlencode(json_encode($query['filters']));
-			
-			if($builder['access']=="stream" or $builder['access']=="reports"){
-			    if(isset($builder['lid']) and $builder['lid']>0) $path="logbooks/".$builder['lid'];
-			    if(isset($builder['rid']) and $builder['rid']>0 and $path!="") $path.="/reports/".$builder['rid'];
-			   
-			    if(!isset($builder['lid']) and !isset($builder['rid'])) $path="reports/";
-			}
-			else $path=$builder['access'];
-			
-			unset($query['rid'],$query['lid']);
-			
-			$request['url']=$terminal.'/'.$path.'/'; 
-			
-			if($request['type']=="get" and !empty($query))$request['url'].='?'.join('&',$query);
-			else $request['fields']=$query;
-		 
-		}
-		return $request;
-	}
-	
-	/**
-	 * Send the built request to the api via curl
-	 * @param array $request
-	 */
-	public function send($request=array()) {
-		
-		/**
-		 * print request configuration, before send
-		 */
-		if($this->debug){
-			print_r($request);
-		}
-		
-		$curl_handle = curl_init();
-		curl_setopt($curl_handle, CURLOPT_URL, $request['url']);
-		curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($curl_handle, CURLOPT_SSL_VERIFYPEER, FALSE);
-		curl_setopt($curl_handle, CURLOPT_SSL_VERIFYHOST, 2);
-		
-		if(!isset($request['op']))
-		 curl_setopt($curl_handle, CURLOPT_USERPWD,$this->public_key.':'.$this->private_key);
-		
-		 if($request['type']=="post"){
-			curl_setopt($curl_handle, CURLOPT_POST, count($request['fields']));
-			curl_setopt($curl_handle, CURLOPT_POSTFIELDS, http_build_query($request['fields'], '', '&')); 
-	 	} 
-	
-		$response = curl_exec($curl_handle);
-	    $info=curl_getinfo($curl_handle,CURLINFO_HTTP_CODE);
-	    
-	   if(!isset($request['format']) or $request['format']=="json") $response=json_decode($response);
-	    
-	    
-		curl_close($curl_handle);
-	
-	    return $response;
-	
-	}
-	
-	/**
-	 * Compose and send the request from the called method
-	 *  * format: getMethod,createMethod,updateMethod -> concrete: getStream(array)
-	 *  
-	 * @param string $method
-	 * @param array $args
-	 */
-	public function __call($method,$args) {
- 
-		$data=array();
-		$analyzed=array();
-		$builder=array();
-		
-		/**
-		 * Analyze called method
-		 */
-        if(preg_match("/^(get|create|update|list)(.*)/", $method,$analyzed)){
+    /**
+     * Feeds the configurations to the instance
+     * 
+     * @param array $confs
+     */
+    public static function configure($confs=array()){
         
-           /**
-            * Create request parameters
-            * @var array
-            */
-           $builder['op']=$analyzed[1];
-           $builder['access']=strtolower($analyzed[2]);
-           $builder=array_merge($builder,$args[0]);
+        self::_create();
+        
+        if(isset($confs['private_key'])) self::$instance->setPrivateKey($confs['private_key']);
+        if(isset($confs['public_key'])) self::$instance->setPublicKey($confs['public_key']);
+        if(isset($confs['version'])) self::$instance->setVersion($confs['version']);
+        if(isset($confs['debug'])) self::$instance->setDebug($confs['debug']);
+    }
+    
+
+    /**
+     * Setter for the api version
+     * @param string $v
+     * @return Compass
+     */
+    public function setVersion($v = "") {
+        $this->version = $v;
+        return $this;
+    }
+
+    /**
+     * Setter for  the output format 
+     * @param string $format
+     */
+    public function setOutputFormat($format = "json") {
+        $this->output = $format;
+
+        return $this;
+    }
+
+    /**
+     * Formatting the data to be send ready
+     * 
+     * @param array $builder
+     * @return array
+     */
+    private function buildRequest($builder = array()) {
+
+        if ($builder['__api_op'] == "log") {
            
-           /**
-            * Build request
-            * @var array
-            */
-           $request=$this->buildRequest($builder);
+              if(!isset($this->public_key) or $this->public_key=="") 
+                    $this->registerError("a public key must be provided"); 
+                 
+              
+            $terminal = (($this->secure) ? 'https' : 'http') . '://' . $this->collect_endpoint;
+
+            $type = (!isset($builder['_type']) or ! in_array($builder['_type'], array("action", "error"))) ? "action" : $builder['_type'];
+            $cvars = "";
+            $event = isset($builder['_event']) ? $builder['_event'] : "N/A";
+            $event= urlencode($event);
+            unset($builder['__api_op'],$builder['_event']);
+
+            if (!empty($builder)) {
+                foreach ($builder as $k => $p) {
+                    if ($k == "_identity")
+                        $k = "&itp_itid";
+                    else
+                        $k = "&itp_" . $k;
+                    $cvars.=$k . "=" . urlencode($p);
+                }
+            }
+
+              
+            $terminal.="?_itkey=$this->public_key&itp_ittype=$type&itp_itval=$event" . $cvars;
+            $request['url'] = $terminal;
+            $request['type'] = "get";
+            $request['op'] = "log";
+        }
+        else {
+
+             if(!isset($this->public_key) or !isset($this->private_key))
+                   $this->registerError("a private key and a public key must be provided" ); 
+             
+            $terminal = (($this->secure) ? 'https' : 'http') . '://' . $this->endpoint . '/atlas/' . $this->version . '';
+
+            if ($builder['__api_op'] == "get" or $builder['__api_op'] == "list") {
+                $request['type'] = "get";
+            } else {
+                $request['type'] = "post";
+            }
+
+            $query = $builder;
+
+            unset($query['op'], $query['access']);
+
+            if (isset($query['filters']) and is_array($query['filters']))
+                $query['filters'] = "filters=" . urlencode(json_encode($query['filters']));
+
+            if ($builder['access'] == "stream" or $builder['access'] == "reports") {
+                if (isset($builder['lid']) and $builder['lid'] > 0)
+                    $path = "logbooks/" . $builder['lid'];
+                if (isset($builder['rid']) and $builder['rid'] > 0 and $path != "")
+                    $path.="/reports/" . $builder['rid'];
+
+                if (!isset($builder['lid']) and ! isset($builder['rid']))
+                    $path = "reports/";
+            } else
+                $path = $builder['access'];
+
+            unset($query['rid'], $query['lid']);
+
+            $request['url'] = $terminal . '/' . $path . '/';
+
+            if ($request['type'] == "get" and ! empty($query))
+                $request['url'].='?' . join('&', $query);
+            else
+                $request['fields'] = $query;
+        }
+        return $request;
+    }
+
+    /**
+     * Send the built request to the api via curl
+     * @param array $request
+     */
+    public function send($request = array()) {
+ 
+        /**
+         * print request configuration, before send
+         */
+        if ($this->debug) {
+            echo "<br>The request: ".print_r($request,true);
+        }
+           
+        $curl_handle = curl_init();
+        curl_setopt($curl_handle, CURLOPT_URL, $request['url']);
+        curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl_handle, CURLOPT_SSL_VERIFYPEER, FALSE);
+        curl_setopt($curl_handle, CURLOPT_SSL_VERIFYHOST, 2);
+ 
+        if (!isset($request['op'])){           
+            curl_setopt($curl_handle, CURLOPT_USERPWD, $this->public_key . ':' . $this->private_key);
+        }
+
+        if ($request['type'] == "post") {
+            curl_setopt($curl_handle, CURLOPT_POST, count($request['fields']));
+            curl_setopt($curl_handle, CURLOPT_POSTFIELDS, http_build_query($request['fields'], '', '&'));
+        }
+
+        $response = curl_exec($curl_handle);
+        $info = curl_getinfo($curl_handle, CURLINFO_HTTP_CODE);
+  
+        /**
+         * a curl server error?
+         */
+        if($info!=200 and $response==""){
+            $errcode=  curl_errno($curl_handle);
+            $errmsg= curl_error($curl_handle);
+            return $this->registerError("a problem occured while sending the request: $errcode. $errmsg" ); 
+        }  
         
+           /**
+         * print request configuration, before send
+         */
+        if ($this->debug) {
+            echo "<br>Header: http->$info";
+            echo "<br>Curl version: ".print_r(curl_version(),true);
+            echo "<br>The response: ".print_r($response,true);
         }
-        else
-        {
-        	/**
-        	 * Send a action or error log to colletor endpoint
-        	 */
-        	if($method=="action" or $method=="error"){
-        		$args[0]['op']=$method;
-        		$request=$this->buildRequest($args[0]);
-        	}
+       
+        if (!isset($request['format']) or $request['format'] == "json")
+            $response = json_decode($response);
+          
+        curl_close($curl_handle);
+       
+        
+        return $response;
+    }
+
+  
+    /**
+     * 
+     */
+    private static function _create() {
+
+        if (!isset(self::$instance))
+            self::$instance = new CompassApi();
+    }
+
+    /**
+     * Compose and send the request from the called method
+     *  * format: getMethod,createMethod,updateMethod -> concrete: getStream(array)
+     *  
+     * @param string $method
+     * @param array $args
+     */
+    public static function __callStatic($method, $args) {
+    	
+        self::_create();
+       
+        /**
+         * fix forwaded format
+         */
+        if (!empty($args))
+            $args['fix'] =1;
+
+        /**
+         * Forward action to the instance
+         */
+        return self::$instance->{$method}($args);
+    }
+   
+    /**
+     *  Checkes whether any errors found on the wrapper level 
+     * 
+     * @return Boolean
+     */
+    public function noError(){
+        return empty($this->errors)?true:false;
+    }
+    
+    /**
+     *  Pushes the wrapper error array to the stack
+     * 
+     * @param type $err
+     * @return \CompassApi
+     */
+    public function registerError($err=  array()){
+        $this->errors[]=$err;
+        return $this;
+    }
+    
+    /**
+     * Return the error stack
+     * 
+     * @return array
+     */
+    public function getErrors(){
+        return array("status"=>"error","msg"=>$this->errors);
+    }
+    
+    /**
+     *  Catches invalid method calls  of the instantiated object
+     * 
+     * @param type $method
+     * @param type $args
+     * @return string
+     */
+    public function __call($method = "", $args = array()) {
+    	
+        /**
+         * Reset previous request
+         */
+        $this->errors=array();
+        $data = array();
+        $analyzed = array();
+        $builder = array();
+        $request=null;
+
+        /**
+         * If the request comes from static medium, fix format
+         */
+        if(isset($args[0]['fix'])){
+        	unset($args[0]['fix']);
+        	$args=$args[0];
         }
-		
         
         /**
-         * Send final composed request
+         * Analyze called method
+         */
+        if (preg_match("/^(get|create|update|list)(.*)/", $method, $analyzed)) {
+
+            /**
+             * Create request parameters
+             * @var array
+             */
+            $builder['__api_op'] = $analyzed[1];
+            $builder['access'] = strtolower($analyzed[2]);
+            $builder = array_merge($builder, $args[0]);
+
+            /**
+             * Build request
+             * @var array
+             */
+            if($this->noError())
+              $request = $this->buildRequest($builder);
+        } else { 
+            /**
+             * Send a action or error log to colletor endpoint
+             */
+            if ($method == "log") {
+            	
+               if(sizeof($args)==0) $this->registerError("no arguments provided"); 
+                                 
+            	/**
+            	 * polymorph
+            	 */
+            	if(sizeof($args)==1) $tolog=is_array($args[0])?$args[0]:array("_event"=>$tolog);
+                else { 
+                     $tolog=is_array($args[0])? $args[0]:array_merge(array("_event"=>$args[0]),$args[1]);               
+                }
+                $tolog['__api_op'] = $method;
+                
+                if($this->noError()) $request = $this->buildRequest($tolog);
+            }
+            else $this->registerError("invalid method call: $method"); 
+        } 
+
+      
+        /**
+         * Send final composed request -> if no error occured on composition
          * @var array
          */
-        $data=$this->send($request);
-		
-		return $data;
-	}
-    
- 
-    
-
-
+        if($this->noError()) 
+           $data = $this->send($request);
+        
+         /**
+          * Show errors
+          */
+         if(!$this->noError() and $this->debug) {
+             $data=$this->getErrors();
+             print_r($data);
+         }
+        
+        return $data;
+    }
 
 }
