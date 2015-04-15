@@ -33,21 +33,16 @@
  The "xxxxxxxxxxxxxxxx" has to be replaced with you public key. 
  You can also use the code from this repository and point the link to the file on the server that contains the code (my.innertrends.com/itl.js).
  
- To send a log to InnerTrends the "log" method has to be used, which accepts 3 parameters:
+ To send a log to InnerTrends the "log" method has to be used, which accepts 2 parameters:
 
 Parameter | Optional | Description
 --- | --- | ---
-type | true | determines the event type. Innertrends supports 2 types: action, error. If the type is not set it defaults to "action"
 event | false | the event name
 event data | true | the event data, an object of contextual data for the current event.
 
 ###### Valid methods of using the log function
-
-``` _itl.log(type,event,event_data); ```
- or
- ``` _itl.log(event,event_data); ```
-  or
- ```  _itl.log(event); ```
+  ``` _itl.log(event,event_data); ```
+ 
  
   When storing a log we usually want to relate it to an active user. To create this connection we can use two methods:
   1. in the event_data object you must add the special key "_identity" that will hold the user identifier
@@ -58,6 +53,7 @@ event data | true | the event data, an object of contextual data for the current
      ```  _itl.log("no_dentity"); ```
      note: the "_identity" special key, from the event_data, will overwrite  for the current request the globally set user       
  
+  The logs are logically separated in two categories: errors and actions. The default type if not explicitly set is "action". To send an 'error' event in the 'event data' array use the '_type' special key to set it. ( _type:"error")
  
  To query the logs database you must use the "stream" method   which accepts 1 parameter:
 
@@ -115,7 +111,7 @@ or
 ###### Store an error log:
 
  ```js
-_itl.log("error","user warning",{error:"A problem occurred",section:"campaign",context:document.location.href});
+_itl.log("user warning",{_type:"error",error:"A problem occurred",section:"campaign",context:document.location.href});
  ```
 ###### Store an buy event:
 
