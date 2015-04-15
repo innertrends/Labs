@@ -53,7 +53,7 @@ event data | true | the event data, an object of contextual data for the current
      ```  _itl.log("no_dentity"); ```
      note: the "_identity" special key, from the event_data, will overwrite  for the current request the globally set user       
  
-  The logs are logically separated in two categories: errors and actions. The default type if not explicitly set is "action". To send an 'error' event in the 'event data' array use the '_type' special key to set it. ( _type:"error")
+ The logs are logically separated in two categories: errors and actions. The default type if not explicitly set is "action". To send an 'error' event in the 'event data' array use the '_type' special key to set it. ( _type:"error")
  
  To query the logs database you must use the "stream" method   which accepts 1 parameter:
 
