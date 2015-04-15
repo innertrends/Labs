@@ -15,9 +15,9 @@
 
  Usage
 -----
- When instantiating the client you can set the public key, private key and version in the constructor.    These are optional and can later be set via the specific setter methods that the wrapper implements (setVersion($v), setPrivateKey($k), setPublicKey($k)).
+ After you registered the wrapper in your autoload handler or just included the path, you can start using its static methods. To set/change its configurations you must use the "CompassApi::configure" method: `` CompassApi::configure(array("public_key"=>"xxxxxxxxxxxxxxxxxxxx","private_key"=>"xxxxxxxxxxxxxxxxxxxx","version"=>"xx","debug"=>true));`` . Only the 'public_key' is mandatory.
 
- Another, more global approach, to set this configuration variables is to use constants that are defined before the instantiation and visible throughout the application. As a first act, the library check if the constants exist, and if true, they are being used.
+ Another, more global approach, to set this configuration variables is to use constants that are defined before the instantiation and visible throughout the application. If the system you use permits this.  As a first act, the library checks if the constants exist, and if true, they are being used. (recommended)
 
 Constant | Variable
 --- | ---
@@ -34,9 +34,8 @@ event data | true | the event data, an array of contextual data for the current 
 
 ######  sending a log
 
-```  $client->action($event_data); ```
- or
- ``` $client->error($event_data); ```
+``` CompassApi::log("event_name",$event_data); ```
+ 
  
  The '$event_data' is a 'key -> value' array that holds all the contextual data of the event; the keys hold the name of the event member, and the value  their description.
  We do have a few special key that should and can be used only in the intended puposes:
@@ -44,55 +43,47 @@ event data | true | the event data, an array of contextual data for the current 
  Key | Optional | Description
 --- | --- | ---
 _event | true | this designates the current event name. The name of the entire context. If not set, the default                    will be set to 'other'
+_type | true | this designates the type of log you are going to send. "error" or "action". The default is "action".
 _identity | true | the subject of the event. The actual user. The format is of your choosing, it can be an email                    address or anykind of string with which you can identify him.
  
  Examples
 -----
  
-###### Instantiating the Client Library:
+###### Instantiating the Client Library if no global static variables are set:
 ```php
-$client= new CompassApi(); // if it takes the configuration from the global constants
-//or
-$client= new CompassApi($public_key,$private_key,$version);
+CompassApi::configure(array("public_key"=>"xxxxxxxxxxxxxx"))
 ```
-
-###### Configuring the Library by using the setters
-```php
-$client= new CompassApi();
-$client->setPrivateKey($private_key);
-$client->setPublicKey($public_key); 
-```
-
+  
 ###### Sending an action event to IT
 ```php
     		      
- $client->action(array("_event"=>"register","Website"=>"http://somesite.com","Name"=>"Jon Doe" ));
+ CompassApi::log("register",array("Website"=>"http://somesite.com","Name"=>"Jon Doe" ));
 ```
 
 ###### Sending an error event to IT
 ```php
- 	$client->error(array("_event"=>"register","_identity"=>"user@site.com","fault"=>"invalid email address supplied" ));
+ 	 CompassApi::log("register",array("_type"=>"error","_identity"=>"user@site.com","fault"=>"invalid email address supplied" ));
 ``` 
 
 ######  List all logbooks accessible for the current account
 ```php  
 
- $logbooks=$client->listLogbooks();
+ $logbooks= CompassApi::listLogbooks();
 ```
 
 ######  List all reports accessible for the current account, bound to a logbook
 ```php  
- $reports=$client->listReports(array("lid"=>17));
+ $reports= CompassApi::listReports(array("lid"=>17));
 ```
 
 ###### Extract last records from the  logbook: 17 
 ```php 
- $records=$client->getStream(array( "lid"=>17));
+ $records= CompassApi::getStream(array( "lid"=>17));
 ```
 
 ###### Return the number of entries in the   logbook: 17 
 ```php 
- $records=$client->getStream(array( "lid"=>17,"filters"=>array("operator"=>"count")));
+ $records= CompassApi::getStream(array( "lid"=>17,"filters"=>array("operator"=>"count")));
 ```
 
 ###### Extract last records from the  logbook: 17, report: 81 with an extra filter:
@@ -105,7 +96,7 @@ $client->setPublicKey($public_key);
             )
  		); 
  
- $records=$client->getStream($data);
+ $records CompassApi::getStream($data);
 ```
 Support
 -------------------
