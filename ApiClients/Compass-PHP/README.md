@@ -29,8 +29,8 @@ To send a log to InnerTrends the "action"/ "error" method has to be used, which 
 
 Parameter | Optional | Description
 --- | --- | ---
-event name | false | the event data, an array of contextual data for the current event
-event data | true | the event name, how you want to label the
+event name | false | the event name, how you want to label the collected contextual data
+event data | true | the event data, an array of contextual data for the current event 
 
 ######  sending a log
 
