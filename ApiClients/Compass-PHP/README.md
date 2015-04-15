@@ -29,15 +29,15 @@ To send a log to InnerTrends the "action"/ "error" method has to be used, which 
 
 Parameter | Optional | Description
 --- | --- | ---
- 
-event data | true | the event data, an array of contextual data for the current event
+event name | false | the event data, an array of contextual data for the current event
+event data | true | the event name, how you want to label the
 
 ######  sending a log
 
 ``` CompassApi::log("event_name",$event_data); ```
  
  
- The '$event_data' is a 'key -> value' array that holds all the contextual data of the event; the keys hold the name of the event member, and the value  their description.
+ The '$event_data' is a 'key -> value' array that holds all the contextual data of the event; the keys hold the name of the event member, and the value,  his description.
  We do have a few special key that should and can be used only in the intended puposes:
  
  Key | Optional | Description
@@ -49,7 +49,7 @@ _identity | true | the subject of the event. The actual user. The format is of y
  Examples
 -----
  
-###### Instantiating the Client Library if no global static variables are set:
+###### Instantiating the Client Library if no global constant variables are set:
 ```php
 CompassApi::configure(array("public_key"=>"xxxxxxxxxxxxxx"))
 ```
