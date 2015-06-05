@@ -105,10 +105,9 @@
 		     if(p!=null && typeof p=="object"){
 		    	 var cvars="";
 		    	 for(var i in p){
-		    		 if(i!="_identity")
-		    		   cvars+="&itp_"+i+"="+encodeURIComponent(p[i]);
-		    		 else if(i!="_type") l=p[i];
-		    		 else contextid=p[i];
+		    		 if(i=="_identity")  contextid=p[i] 
+		    		 else if(i=="_type") l=p[i];
+		    		 else cvars+="&itp_"+i+"="+encodeURIComponent(p[i]);
 		    	 }
 		     }
 		     
