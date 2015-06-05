@@ -195,7 +195,7 @@ class CompassApi {
                     if ($k == "_identity")
                         $k = "&itp_itid";
                     else
-                        $k = "&itp_" . $k;
+                        $k = "&itp_" . urlencode($k);
                     $cvars.=$k . "=" . urlencode($p);
                 }
             }
