@@ -49,7 +49,7 @@ class CompassApi {
      * 
      * @var Boolean
      */
-    private $secure = true;
+    private $secure = false;
 
     /**
      * Your developer private api key
@@ -181,27 +181,34 @@ class CompassApi {
               if(!isset($this->public_key) or $this->public_key=="") 
                     $this->registerError("a public key must be provided"); 
                  
-              
+      
             $terminal = (($this->secure) ? 'https' : 'http') . '://' . $this->collect_endpoint;
-
-            $type = (!isset($builder['_type']) or ! in_array($builder['_type'], array("action", "error"))) ? "action" : $builder['_type'];
-            $cvars = "";
-            $event = isset($builder['_event']) ? $builder['_event'] : "N/A";
-            $event= urlencode($event);
-            unset($builder['__api_op'],$builder['_event']);
-
+            $payload=array("event"=>"","type"=>"action","identity"=>"","context"=>new stdClass());
+            $cvars = "";  
+            unset($builder['__api_op']);
+           
             if (!empty($builder)) {
                 foreach ($builder as $k => $p) {
-                    if ($k == "_identity")
-                        $k = "&itp_itid";
-                    else
-                        $k = "&itp_" . urlencode($k);
-                    $cvars.=$k . "=" . urlencode($p);
+                    $del=0;
+                    if ($k == "_identity"){
+                        $payload['identity']=$p; $del=1;
+                    }
+                    else  if ($k == "_type"){
+                         in_array($p, array("action", "error"))?$payload['type']=$p:""; $del=1;
+                    }
+                    else  if ($k == "_event"){
+                            $payload['event']=$p; $del=1;
+                        }
+                    if($del==1)unset($builder[$k]);
                 }
             }
-
-              
-            $terminal.="?_itkey=$this->public_key&itp_ittype=$type&itp_itval=$event" . $cvars;
+            empty($builder)?$builder=new stdClass():"";
+            $payload['context']=$builder; 
+            /**
+             * prepare payload data for http transfer
+             */
+            $payload=urlencode(json_encode($builder));  
+            $terminal.="?_itkey=$this->public_key&_itp=$payload";
             $request['url'] = $terminal;
             $request['type'] = "get";
             $request['op'] = "log";
@@ -260,14 +267,14 @@ class CompassApi {
          */
         if ($this->debug) {
             echo "<br>The request: ".print_r($request,true);
-        }
+        } 
            
         $curl_handle = curl_init();
         curl_setopt($curl_handle, CURLOPT_URL, $request['url']);
-        curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER, 1); 
         curl_setopt($curl_handle, CURLOPT_SSL_VERIFYPEER, FALSE);
         curl_setopt($curl_handle, CURLOPT_SSL_VERIFYHOST, 2);
- 
+        
         if (!isset($request['op'])){           
             curl_setopt($curl_handle, CURLOPT_USERPWD, $this->public_key . ':' . $this->private_key);
         }
@@ -276,10 +283,16 @@ class CompassApi {
             curl_setopt($curl_handle, CURLOPT_POST, count($request['fields']));
             curl_setopt($curl_handle, CURLOPT_POSTFIELDS, http_build_query($request['fields'], '', '&'));
         }
-
-        $response = curl_exec($curl_handle);
-        $info = curl_getinfo($curl_handle, CURLINFO_HTTP_CODE);
-  
+        else
+        {
+           // curl_setopt($curl_handle, CURLOPT_NOBODY, true);
+           // curl_setopt($curl_handle, CURLOPT_TIMEOUT_MS, 100);
+        }
+      
+         $response = curl_exec($curl_handle);   
+        
+         $info = curl_getinfo($curl_handle, CURLINFO_HTTP_CODE);
+         //print_r($info);die();
         /**
          * a curl server error?
          */
@@ -425,9 +438,14 @@ class CompassApi {
             	/**
             	 * polymorph
             	 */
-            	if(sizeof($args)==1) $tolog=is_array($args[0])?$args[0]:array("_event"=>$tolog);
-                else { 
-                     $tolog=is_array($args[0])? $args[0]:array_merge(array("_event"=>$args[0]),$args[1]);               
+            	if(sizeof($args)==1) $tolog=is_array($args[0])?$args[0]:array("_event"=>$args[0]);
+                else if(sizeof($args)==2) { 
+                     $tolog=is_array($args[1])?array_merge(array("_event"=>$args[0]),$args[1])
+                                               :array("_event"=>$args[1],"_identity"=>$args[0]);               
+                }
+                else
+                {
+                    $tolog=array_merge(array("_event"=>$args[1],"_identity"=>$args[0]),$args[2]);
                 }
                 $tolog['__api_op'] = $method;
                 
