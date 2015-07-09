@@ -311,7 +311,7 @@ class CompassApi {
             echo "<br>The response: ".print_r($response,true);
         }
        
-        if (!isset($request['format']) or $request['format'] == "object")  $response = json_decode($response);
+        if ($this->output == "object")  $response = json_decode($response);
           
         curl_close($curl_handle);
        
