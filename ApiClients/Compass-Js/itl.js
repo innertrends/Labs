@@ -84,51 +84,60 @@
 		    	 return;
 		     }
 		   
-		     var build="_itkey="+cfg.key;
+		     var cvars="",callback=null, build="_itkey="+cfg.key,cvarse=false,
+		    	   payload={type:"action",event:"",identity:"",context:{}}; 
+			 
+		     if(typeof l!="object"){
+			     if(b==null){
+			    	 b=l;
+			    	 l=null; 
+			     } 
+			     else if(typeof b=="object"){
+			    	 p=b;
+			    	 b=l;
+			    	 l=null;
+			     }
+		     } else { p=l, l=null; };
 		     
-		      if(b==null){
-		    	 b=l;
-		    	 l=null; 
-		     }
-		     else  if(typeof b=="object"){
-		    	 p=b;
-		    	 b=l;
-		    	 l=null;
-		     }
-		   
-		     if(b==null){ 
-		    	 err("empty log object given")
+		     if( b==null && (p==null || (typeof p=="object" && !p._event)) ) {
+		    	 err('empty event name');
 		    	 return false;
-		     }
+		     } 		     
+		     payload.event=b;
+		     l?payload.identity=l:cfg.obs.identity?payload.identity=cfg.obs.identity:""; 
 		     
-		     var contextid=null
-		     if(p!=null && typeof p=="object"){
-		    	 var cvars="";
+		     p==null?p={}:"";
+		      if(typeof p=="object"){ 
+		    	 cvarse=true;
 		    	 for(var i in p){
-		    		 if(i=="_identity")  contextid=p[i] 
-		    		 else if(i=="_type") l=p[i];
-		    		 else cvars+="&itp_"+i+"="+encodeURIComponent(p[i]);
+		    		 var d=0
+		    		 if(i=="_callback"){
+		    			 callback=p[i];  d=1;
+		    		 }
+		    		 else if(i=="_identity"){
+		    			 payload.identity=p[i]; d=1;
+		    		 }
+		    		 else if(i=="_event"){
+		    			 payload.event=p[i]; d=1;
+		    		 }
+		    		 else if(i=="_type") {
+		    			 ["action","error"].toString().indexOf(i)!=-1?payload.type=p[i]:""; d=1;
+		    		 }
+		    		 
+		    		 d==1?delete p[i]:"";
 		    	 }
 		     }
-		     
-		     if(l==null || (arguments.length==3 && (l==null || l=="" || ["action","error"].toString().indexOf(l)==-1))){
-		    	l="action";
-		     }
-		     
-		     build+="&itp_ittype="+l;
-		     build+="&itp_itval="+b;
-		     
-		
-		     
-		    if(cfg.obs.identity || contextid) {
-		    	var uid=contextid?contextid:cfg.obs.identity;
-	             build+="&itp_itid="+uid;
-             }
-		     
-		    if(p!=null && typeof p=="object")  build+=cvars;
-		     
+		     payload.context=p;
+		     payload=JSON.stringify(payload);
+		     build+="&_itp="+encodeURIComponent(payload);
 		     var transport=new Image();
 		         transport.src=cfg.store_ep+build;
+		         
+		         if(cvarse && p._callback){
+			         transport.onload=function(){
+			        	 p._callback();
+			         }
+		         }
 	   } 
 	   
 	   function identity(id){
