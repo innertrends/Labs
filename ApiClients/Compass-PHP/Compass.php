@@ -183,7 +183,7 @@ class CompassApi {
                  
       
             $terminal = (($this->secure) ? 'https' : 'http') . '://' . $this->collect_endpoint;
-            $payload=array("event"=>"","type"=>"action","identity"=>"","context"=>new stdClass());
+            $payload=array("event"=>"","version"=>$this->version,"type"=>"action","identity"=>"","context"=>new stdClass());
             $cvars = "";  
             unset($builder['__api_op']);
            
