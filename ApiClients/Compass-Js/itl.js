@@ -2,7 +2,7 @@
 	
 	   var cfg={store_ep:"https://babel.innertrends.com/store?",
 			    query_ep:"https://compass-alfa.innertrends.com/atlas/latest/",
-			    key:_itlk, domain:_itld,obs:{identity:null},
+			    key:_itlk, domain:_itld,obs:{identity:null},version:1.0,
 	            af:['user',"citj"]};
 	   
 	   function err(e){
@@ -104,6 +104,7 @@
 		    	 return false;
 		     } 		     
 		     payload.event=b;
+		     payload.version=cfg.version;
 		     l?payload.identity=l:cfg.obs.identity?payload.identity=cfg.obs.identity:""; 
 		     
 		     p==null?p={}:"";
