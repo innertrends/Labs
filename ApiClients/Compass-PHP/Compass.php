@@ -207,7 +207,7 @@ class CompassApi {
             /**
              * prepare payload data for http transfer
              */
-            $payload=urlencode(json_encode($builder));  
+            $payload=urlencode(json_encode($payload));  
             $terminal.="?_itkey=$this->public_key&_itp=$payload";
             $request['url'] = $terminal;
             $request['type'] = "get";
