@@ -25,17 +25,23 @@ IT_COMPASS_PUBLIC_KEY | Public key
 IT_COMPASS_PRIVATE_KEY | Private key
 IT_COMPASS_VERSION | The api version
 
-To send a log to InnerTrends the "action"/ "error" method has to be used, which accepts just one parameter:
+To send a log to InnerTrends the "log" method has to be used, which accepts a minimum of one parameter:
+
+Usually you want to know the WHO, WHAT and the HOW. But you can also just send the WHAT
 
 Parameter | Optional | Description
 --- | --- | ---
-event name | false | the event name, how you want to label the collected contextual data
-event data | true | the event data, an array of contextual data for the current event 
+identity | true | the user identifier, it cand be an email or a specific internal id (WHO)
+event name | false | the event name, how you want to label the collected contextual data (WHAT)
+event data | true | the event  properties, an array of contextual data for the current event (HOW)
 
 ######  sending a log
 
-``` CompassApi::log("event_name",$event_data); ```
- 
+``` CompassApi::log($user_email,"event_name",$event_data); ```
+ or
+ ``` CompassApi::log("event_name",$event_data); ```
+  or
+ ``` CompassApi::log("event_name"); ```
  
  The '$event_data' is a 'key -> value' array that holds all the contextual data of the event; the keys hold the name of the event member, and the value,  his description.
  We do have a few special key that should and can be used only in the intended puposes:
@@ -62,7 +68,10 @@ CompassApi::configure(array("public_key"=>"xxxxxxxxxxxxxx"))
 
 ###### Sending an error event to IT
 ```php
- 	 CompassApi::log("register",array("_type"=>"error","_identity"=>"user@site.com","fault"=>"invalid email address supplied" ));
+	 CompassApi::log("update account",array("_type"=>"error","_identity"=>"user@site.com","fault"=>"invalid email address supplied" ));
+```
+	 or
+```php	 CompassApi::log("user@site.com","update account",array("_type"=>"error","fault"=>"invalid email address supplied" ));
 ``` 
 
 ######  List all logbooks accessible for the current account
