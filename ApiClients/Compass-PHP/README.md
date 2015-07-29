@@ -62,16 +62,17 @@ CompassApi::configure(array("public_key"=>"xxxxxxxxxxxxxx"))
   
 ###### Sending an action event to IT
 ```php
-    		      
- CompassApi::log("register",array("Website"=>"http://somesite.com","Name"=>"Jon Doe" ));
+ CompassApi::log("user@site.com","register",array("Website"=>"http://somesite.com","Name"=>"Jon Doe" ));
 ```
 
 ###### Sending an error event to IT
 ```php
 	 CompassApi::log("update account",array("_type"=>"error","_identity"=>"user@site.com","fault"=>"invalid email address supplied" ));
 ```
-	 or
-```php	 CompassApi::log("user@site.com","update account",array("_type"=>"error","fault"=>"invalid email address supplied" ));
+or
+
+```php
+ 	 CompassApi::log("user@site.com","update account",array("_type"=>"error","fault"=>"invalid email address supplied" ));
 ``` 
 
 ######  List all logbooks accessible for the current account
