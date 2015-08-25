@@ -53,13 +53,13 @@
 		    xhr.onreadystatechange = function() {
 		         
 		        if (xhr.readyState == 4) {  
-		            var response="{}"; 
+		            var response={}; 
 		             if(xhr.status==500){ 
 		                 response={status:'error',message:"Internal server error",http_status:500};
 		             }
 		             else{
 		                  if(xhr.responseText!=""){ 
-		                      response=xhr.responseText;
+		                       response=JSON.parse(xhr.responseText);
 		                  }
 		                  else response={status:'error',message:"Internal server error",http_status:500};
 		             }
