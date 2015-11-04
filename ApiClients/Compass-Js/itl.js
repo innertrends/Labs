@@ -3,7 +3,9 @@
 	   var cfg={store_ep:"https://babel.innertrends.com/store?",
 			    query_ep:"https://compass-alfa.innertrends.com/atlas/latest/",
 			    key:_itlk, domain:_itld,obs:{identity:null},version:1.0,
-	            af:['user',"citj"]};
+	           af:['user',"citj"],
+                   log_index:-1
+                    };
 	   
 	   function err(e){
 		   if(console){
@@ -131,6 +133,7 @@
 		     payload.context=p;
 		     payload=JSON.stringify(payload);
 		     build+="&_itp="+encodeURIComponent(payload);
+		     build+= "&_unq=" + getUniqueIdentificator();
 		     var transport=new Image();
 		         transport.src=cfg.store_ep+build;
 		         
@@ -147,7 +150,10 @@
 	   function noIdentity(id){
 		   cfg.obs.identity=null;
 	   }
-	   
+	  function getUniqueIdentificator() {
+        	 cfg.log_index++;
+         	return (cfg.log_index + (new Date()).valueOf().toString());
+           }
 	   function init(){
 		    if(typeof _itlt!="undefined" && _itlt.length>0){
 		    	for(var i=0;i<=_itlt.length-1;i++){ 
