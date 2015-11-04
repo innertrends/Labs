@@ -78,6 +78,12 @@ class CompassApi {
     private static $instance = null;
 
     /**
+     * Holds log counts in session
+     * @var Int
+     */
+    private $logIndex = 0;
+    
+    /**
      * Initiate
      * @param string $pubk
      * @param string $privk
@@ -104,8 +110,10 @@ class CompassApi {
             $this->version = $version;
     }
 
-    /**
+  /**
      * Activate debug mode;
+     * @param boolean $d
+     * @return $this
      */
     public function setDebug($d=true) {
         $this->debug = $d;
@@ -208,7 +216,8 @@ class CompassApi {
              * prepare payload data for http transfer
              */
             $payload=urlencode(json_encode($payload));  
-            $terminal.="?_itkey=$this->public_key&_itp=$payload";
+            $uniqueIdentifier = $this->logIndex++ . str_replace('.','',microtime(true));
+            $terminal.="?_itkey=$this->public_key&_itp=$payload&_unq=$uniqueIdentifier";
             $request['url'] = $terminal;
             $request['type'] = "get";
             $request['op'] = "log";
