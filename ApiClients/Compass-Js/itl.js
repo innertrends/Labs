@@ -1,7 +1,7 @@
  window['_itl']=(function(){
 	
 	   var cfg={store_ep:"https://babel.innertrends.com/store?",
-			    query_ep:"https://compass-alfa.innertrends.com/atlas/latest/",
+			    query_ep:"https://compass.innertrends.com/atlas/latest/",
 			    key:_itlk, domain:_itld,obs:{identity:null},version:1.0,
 	           af:['user',"citj"],
                    log_index:-1
