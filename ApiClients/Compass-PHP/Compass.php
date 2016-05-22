@@ -323,8 +323,9 @@ class CompassApi {
             echo "<br>The response: ".print_r($response,true);
             echo  "<br>Wrapper errors:: ".print_r($this->errors,true);
         }
-       
-        if ($this->output == "json")  $response = json_decode($response);
+        
+        //if output is requested as object, convert from default
+        if ($this->output == "object")  $response = json_decode($response);
           
         curl_close($curl_handle);
        
