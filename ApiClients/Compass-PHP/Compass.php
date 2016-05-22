@@ -245,7 +245,7 @@ class CompassApi {
             if ($builder['access'] == "stream" or $builder['access'] == "reports") {
                 if (isset($builder['lid']) and $builder['lid'] > 0)
                     $path = "logbooks/" . $builder['lid'];
-                if (isset($builder['rid']) and $builder['rid'] > 0 and $path != "")
+            if (isset($builder['rid']) and $builder['rid'] > 0 )
                     $path.="/reports/" . $builder['rid'];
 
                 if (!isset($builder['lid']) and ! isset($builder['rid']))
@@ -254,8 +254,11 @@ class CompassApi {
                 $path = $builder['access'];
 
             unset($query['rid'], $query['lid']);
-
-            $request['url'] = $terminal . '/' . $path . '/';
+          
+           $path= '/' . $path . "/";
+           $path=str_replace("//","/", $path);  
+       
+            $request['url'] = $terminal .$path ;
 
             if ($request['type'] == "get" and ! empty($query))
                 $request['url'].='?' . join('&', $query);
@@ -308,7 +311,7 @@ class CompassApi {
         if($info!=200 and $response==""){
             $errcode=  curl_errno($curl_handle);
             $errmsg= curl_error($curl_handle);
-            return $this->registerError("a problem occured while sending the request: $errcode. $errmsg" ); 
+            $this->registerError("a problem occured while sending the request: $errcode. $errmsg" );  
         }  
         
            /**
@@ -318,9 +321,10 @@ class CompassApi {
             echo "<br>Header: http->$info";
             echo "<br>Curl version: ".print_r(curl_version(),true);
             echo "<br>The response: ".print_r($response,true);
+            echo  "<br>Wrapper errors:: ".print_r($this->errors,true);
         }
        
-        if ($this->output == "object")  $response = json_decode($response);
+        if ($this->output == "json")  $response = json_decode($response);
           
         curl_close($curl_handle);
        
