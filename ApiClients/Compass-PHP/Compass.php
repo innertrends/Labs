@@ -182,7 +182,7 @@ class CompassApi {
      * @param array $builder
      * @return array
      */
-    private function buildRequest($builder = array()) {
+        private function buildRequest($builder = array()) {
 
         if ($builder['__api_op'] == "log") {
            
@@ -237,10 +237,12 @@ class CompassApi {
 
             $query = $builder;
 
-            unset($query['op'], $query['access']);
+            unset($query['__api_op'], $query['access']);
 
             if (isset($query['filters']) and is_array($query['filters']))
                 $query['filters'] = "filters=" . urlencode(json_encode($query['filters']));
+             if (isset($query['citj']))
+                $query['citj'] = "citj=" . urlencode(trim($query['citj']));
 
             if ($builder['access'] == "stream" or $builder['access'] == "reports") {
                 if (isset($builder['lid']) and $builder['lid'] > 0)
@@ -264,6 +266,7 @@ class CompassApi {
                 $request['url'].='?' . join('&', $query);
             else
                 $request['fields'] = $query;
+          
         }
         return $request;
     }
