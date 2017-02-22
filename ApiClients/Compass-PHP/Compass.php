@@ -191,8 +191,7 @@ class CompassApi {
                  
       
             $terminal = (($this->secure) ? 'https' : 'http') . '://' . $this->collect_endpoint;
-            $payload=array("event"=>"","version"=>$this->version,"type"=>"action","identity"=>"","context"=>new stdClass());
-            $cvars = "";  
+            $payload=array("event"=>"","labels"=>[],"version"=>$this->version,"type"=>"action","identity"=>"","context"=>new stdClass());
             unset($builder['__api_op']);
            
             if (!empty($builder)) {
@@ -201,20 +200,33 @@ class CompassApi {
                     if ($k == "_identity"){
                         $payload['identity']=$p; $del=1;
                     }
+                    else if ($k == "_labels"){
+                        $payload['labels']=$p; $del=1;
+                    }
                     else  if ($k == "_type"){
                          in_array($p, array("action", "error"))?$payload['type']=$p:""; $del=1;
                     }
                     else  if ($k == "_event"){
                             $payload['event']=$p; $del=1;
                         }
+                    //delete special var
                     if($del==1)unset($builder[$k]);
                 }
             }
             empty($builder)?$builder=new stdClass():"";
-            $payload['context']=$builder; 
-            /**
-             * prepare payload data for http transfer
-             */
+            $payload['context']=$builder;
+            
+            //to real properties key
+            if(isset($payload['context']['_properties'])){
+                $payload['context']['__itl_properties']=$payload['context']['_properties'];
+                unset($payload['context']['_properties']);
+            }
+            
+              if ($this->debug) {
+                   $request['view_payload'] = $payload;
+              }
+              
+            //prepare payload data for http transfer
             $payload=urlencode(json_encode($payload));  
             $uniqueIdentifier = $this->logIndex++ . str_replace('.','',microtime(true));
             $terminal.="?_itkey=$this->public_key&_itp=$payload&_unq=$uniqueIdentifier";
@@ -277,9 +289,7 @@ class CompassApi {
      */
     public function send($request = array()) {
  
-        /**
-         * print request configuration, before send
-         */
+        // print request configuration, before send
         if ($this->debug) {
             echo "<br>The request: ".print_r($request,true);
         } 
@@ -308,18 +318,15 @@ class CompassApi {
         
          $info = curl_getinfo($curl_handle, CURLINFO_HTTP_CODE);
          //print_r($info);die();
-        /**
-         * a curl server error?
-         */
+      
+         //a curl server error?
         if($info!=200 and $response==""){
             $errcode=  curl_errno($curl_handle);
             $errmsg= curl_error($curl_handle);
             $this->registerError("a problem occured while sending the request: $errcode. $errmsg" );  
         }  
         
-           /**
-         * print request configuration, before send
-         */
+       //print request configuration, before send
         if ($this->debug) {
             echo "<br>Header: http->$info";
             echo "<br>Curl version: ".print_r(curl_version(),true);
@@ -357,15 +364,11 @@ class CompassApi {
     	
         self::_create();
        
-        /**
-         * fix forwaded format
-         */
+        // fix forwaded format
         if (!empty($args))
             $args['fix'] =1;
 
-        /**
-         * Forward action to the instance
-         */
+        // Forward action to the instance
         return self::$instance->{$method}($args);
     }
    
@@ -407,53 +410,37 @@ class CompassApi {
      */
     public function __call($method = "", $args = array()) {
     	
-        /**
-         * Reset previous request
-         */
+        //Reset previous request
         $this->errors=array();
         $data = array();
         $analyzed = array();
         $builder = array();
         $request=null;
 
-        /**
-         * If the request comes from static medium, fix format
-         */
+        // If the request comes from static medium, fix format
         if(isset($args[0]['fix'])){
         	unset($args[0]['fix']);
         	$args=$args[0];
         }
         
-        /**
-         * Analyze called method
-         */
+        //Analyze called method
         if (preg_match("/^(get|create|update|list)(.*)/", $method, $analyzed)) {
 
-            /**
-             * Create request parameters
-             * @var array
-             */
+            //Create request parameters
             $builder['__api_op'] = $analyzed[1];
             $builder['access'] = strtolower($analyzed[2]);
             $builder = array_merge($builder, $args[0]);
 
-            /**
-             * Build request
-             * @var array
-             */
+            // Build request
             if($this->noError())
               $request = $this->buildRequest($builder);
         } else { 
-            /**
-             * Send a action or error log to colletor endpoint
-             */
+            // Send a action or error log to colletor endpoint
             if ($method == "log") {
             	
                if(sizeof($args)==0) $this->registerError("no arguments provided"); 
                                  
-            	/**
-            	 * polymorph
-            	 */
+            	//polymorph
             	if(sizeof($args)==1) $tolog=is_array($args[0])?$args[0]:array("_event"=>$args[0]);
                 else if(sizeof($args)==2) { 
                      $tolog=is_array($args[1])?array_merge(array("_event"=>$args[0]),$args[1])
@@ -471,16 +458,11 @@ class CompassApi {
         } 
 
       
-        /**
-         * Send final composed request -> if no error occured on composition
-         * @var array
-         */
+        //Send final composed request -> if no error occured on composition
         if($this->noError()) 
            $data = $this->send($request);
         
-         /**
-          * Show errors
-          */
+         // Show errors
          if(!$this->noError() and $this->debug) {
              $data=$this->getErrors();
              print_r($data);
