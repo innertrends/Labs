@@ -213,7 +213,7 @@ class CompassApi {
                     if($del==1)unset($builder[$k]);
                 }
             }
-            empty($builder)?$builder=new stdClass():"";
+            empty($builder)?$builder=[]:"";
             $payload['context']=$builder;
             
             //to real properties key
