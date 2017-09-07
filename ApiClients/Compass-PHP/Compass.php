@@ -204,7 +204,7 @@ class CompassApi {
                         $payload['labels']=$p; $del=1;
                     }
                     else  if ($k == "_type"){
-                         in_array($p, array("action", "error"))?$payload['type']=$p:""; $del=1;
+                         in_array($p, array("action", "error", "email"))?$payload['type']=$p:""; $del=1;
                     }
                     else  if ($k == "_event"){
                             $payload['event']=$p; $del=1;
