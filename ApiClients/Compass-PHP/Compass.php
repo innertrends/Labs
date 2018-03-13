@@ -45,7 +45,7 @@ class CompassApi {
     private $output = 'json';
 
     /**
-     * Communicat through secure protocol, or not
+     * Communicate through secure protocol, or not
      * 
      * @var Boolean
      */
