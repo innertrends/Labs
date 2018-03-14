@@ -435,7 +435,7 @@ class CompassApi {
             if($this->noError())
               $request = $this->buildRequest($builder);
         } else { 
-            // Send a action or error log to colletor endpoint
+            // Send an action or error log to the collector endpoint
             if ($method == "log") {
             	
                if(sizeof($args)==0) $this->registerError("no arguments provided"); 
