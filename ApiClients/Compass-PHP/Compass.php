@@ -177,6 +177,36 @@ class CompassApi {
     }
 
     /**
+     * Process builder properties
+     * 
+     * @param array $builder
+     * @return array
+     */
+    private function processBuilderProps(&$builder)
+    {
+        $payload=array("event"=>"","labels"=>[],"version"=>$this->version,"type"=>"action","identity"=>"","context"=>new stdClass());
+        foreach ($builder as $k => $p) {
+            $del = 0;
+            if ($k == "_identity") {
+                $payload['identity'] = $p;
+                $del = 1;
+            } else if ($k == "_labels") {
+                $payload['labels'] = $p;
+                $del = 1;
+            } else if ($k == "_type") {
+                in_array($p, array("action", "error", "email")) ? $payload['type'] = $p : "";
+                $del = 1;
+            } else if ($k == "_event") {
+                $payload['event'] = $p;
+                $del = 1;
+            }
+            //delete special var
+            if ($del == 1) unset($builder[$k]);
+        }
+        return $payload;
+    }
+
+    /**
      * Formatting the data to be send ready
      * 
      * @param array $builder
@@ -184,55 +214,71 @@ class CompassApi {
      */
         private function buildRequest($builder = array()) {
 
-        if ($builder['__api_op'] == "log") {
+        $requestType = $builder['__api_op'];
+        if ($requestType == "log" || $requestType == "logBatch") {
            
               if(!isset($this->public_key) or $this->public_key=="") 
                     $this->registerError("a public key must be provided"); 
                  
       
             $terminal = (($this->secure) ? 'https' : 'http') . '://' . $this->collect_endpoint;
-            $payload=array("event"=>"","labels"=>[],"version"=>$this->version,"type"=>"action","identity"=>"","context"=>new stdClass());
             unset($builder['__api_op']);
            
             if (!empty($builder)) {
-                foreach ($builder as $k => $p) {
-                    $del=0;
-                    if ($k == "_identity"){
-                        $payload['identity']=$p; $del=1;
+                if ($requestType == "log") {
+                    $payload = $this->processBuilderProps($builder);
+                    empty($builder) ? $builder = [] : "";
+                    $payload['context'] = $builder;
+                    //to real properties key
+                    if(isset($payload['context']['_properties'])){
+                        $payload['context']['__itl_properties']=$payload['context']['_properties']; 
+                        unset($payload['context']['_properties']);
                     }
-                    else if ($k == "_labels"){
-                        $payload['labels']=$p; $del=1;
+                    //prepare payload data for http transfer
+                    $payload=urlencode(json_encode($payload));  
+                } else {
+                    // $payload = [];
+                    foreach ($builder as $bld) {
+                        $tmpPayload = $this->processBuilderProps($bld);
+                        empty($bld) ? $bld = [] : "";
+                        $tmpPayload['context'] = $bld;
+                        
+                        //to real properties key
+                        if(isset($tmpPayload['context']['_properties'])){
+                            $tmpPayload['context']['__itl_properties']=$tmpPayload['context']['_properties'];
+                            unset($tmpPayload['context']['_properties']);
                     }
-                    else  if ($k == "_type"){
-                         in_array($p, array("action", "error", "email"))?$payload['type']=$p:""; $del=1;
-                    }
-                    else  if ($k == "_event"){
-                            $payload['event']=$p; $del=1;
+                        $payload[] = $tmpPayload;
+                        unset($tmpPayload);
                         }
-                    //delete special var
-                    if($del==1)unset($builder[$k]);
                 }
             }
-            empty($builder)?$builder=[]:"";
-            $payload['context']=$builder;
-            
-            //to real properties key
-            if(isset($payload['context']['_properties'])){
-                $payload['context']['__itl_properties']=$payload['context']['_properties'];
-                unset($payload['context']['_properties']);
+            if (empty($payload)) {
+                $payload = [];
             }
             
               if ($this->debug) {
                    $request['view_payload'] = $payload;
               }
               
-            //prepare payload data for http transfer
-            $payload=urlencode(json_encode($payload));  
+            
             $uniqueIdentifier = $this->logIndex++ . str_replace('.','',microtime(true));
-            $terminal.="?_itkey=$this->public_key&_itp=$payload&_unq=$uniqueIdentifier";
+
+            if ($requestType == 'log') {
+                $terminal .= "?_itkey=$this->public_key&_itp=$payload&_unq=$uniqueIdentifier";
             $request['url'] = $terminal;
             $request['type'] = "get";
             $request['op'] = "log";
+            } else {
+                $request['url'] = $terminal;
+                $request['fields'] = [
+                    "_itkey" => $this->public_key,
+                    "_unq" => $uniqueIdentifier,
+                    "_itpbatch" => $payload
+                ];
+                $request['type'] = "post";
+                $request['op'] = "log";
+        }
         }
         else {
 
@@ -306,7 +352,12 @@ class CompassApi {
 
         if ($request['type'] == "post") {
             curl_setopt($curl_handle, CURLOPT_POST, count($request['fields']));
+            if (isset($request['fields']['_itpbatch'])) {
+                curl_setopt($curl_handle, CURLOPT_HTTPHEADER, ['Accept: application/json', 'Content-Type: application/json']); //Set explicit content type application/json
+                curl_setopt($curl_handle, CURLOPT_POSTFIELDS, json_encode($request['fields']));
+            } else {
             curl_setopt($curl_handle, CURLOPT_POSTFIELDS, http_build_query($request['fields'], '', '&'));
+        }
         }
         else
         {
@@ -416,7 +467,6 @@ class CompassApi {
         $analyzed = array();
         $builder = array();
         $request=null;
-
         // If the request comes from static medium, fix format
         if(isset($args[0]['fix'])){
         	unset($args[0]['fix']);
@@ -435,29 +485,32 @@ class CompassApi {
             if($this->noError())
               $request = $this->buildRequest($builder);
         } else { 
-            // Send an action or error log to the collector endpoint
+            if($method != "log" && $method != 'logBatch') {
+                $this->registerError("invalid method call: $method"); 
+            } else {
             if ($method == "log") {
+                    $args = [$args];
+                }
             	
-               if(sizeof($args)==0) $this->registerError("no arguments provided"); 
-                                 
+                // Send an action or error log to the collector endpoint
+                foreach($args as $arg){
+                    if(sizeof($arg)==0) $this->registerError("no arguments provided"); 
             	//polymorph
-            	if(sizeof($args)==1) $tolog=is_array($args[0])?$args[0]:array("_event"=>$args[0]);
-                else if(sizeof($args)==2) { 
-                     $tolog=is_array($args[1])?array_merge(array("_event"=>$args[0]),$args[1])
-                                               :array("_event"=>$args[1],"_identity"=>$args[0]);               
+                    if(sizeof($arg)==1) $tolog[]=is_array($arg[0])?$arg[0]:array("_event"=>$arg[0]);
+                    else if(sizeof($arg)==2) { 
+                        $tolog[]=is_array($arg[1])?array_merge(array("_event"=>$arg[0]),$arg[1])
+                                                :array("_event"=>$arg[1],"_identity"=>$arg[0]);               
+                    }
+                    else {
+                        $tolog[]=array_merge(array("_event"=>$arg[1],"_identity"=>$arg[0]),$arg[2]);
                 }
-                else
-                {
-                    $tolog=array_merge(array("_event"=>$args[1],"_identity"=>$args[0]),$args[2]);
                 }
+                if ($method == "log" && count($tolog==1)) $tolog = $tolog[0];
+
                 $tolog['__api_op'] = $method;
-                
                 if($this->noError()) $request = $this->buildRequest($tolog);
             }
-            else $this->registerError("invalid method call: $method"); 
         } 
-
-      
         //Send final composed request -> if no error occured on composition
         if($this->noError()) 
            $data = $this->send($request);
