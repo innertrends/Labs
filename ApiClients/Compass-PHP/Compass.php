@@ -182,7 +182,7 @@ class CompassApi {
      * @param array $builder
      * @return array
      */
-        private function buildRequest($builder = array()) {
+      private function buildRequest($builder = array()) {
 
         if ($builder['__api_op'] == "log") {
            
@@ -193,25 +193,29 @@ class CompassApi {
             $terminal = (($this->secure) ? 'https' : 'http') . '://' . $this->collect_endpoint;
             $payload=array("event"=>"","labels"=>[],"version"=>$this->version,"type"=>"action","identity"=>"","context"=>new stdClass());
             unset($builder['__api_op']);
-           
+         
             if (!empty($builder)) {
-                foreach ($builder as $k => $p) {
-                    $del=0;
-                    if ($k == "_identity"){
-                        $payload['identity']=$p; $del=1;
-                    }
-                    else if ($k == "_labels"){
-                        $payload['labels']=$p; $del=1;
-                    }
-                    else  if ($k == "_type"){
-                         in_array($p, array("action", "error", "email"))?$payload['type']=$p:""; $del=1;
-                    }
-                    else  if ($k == "_event"){
-                            $payload['event']=$p; $del=1;
-                        }
-                    //delete special var
-                    if($del==1)unset($builder[$k]);
-                }
+                 if(isset($builder['_identity'])) { 
+                     if(!is_array($builder['_identity']))
+                        $payload['identity']=$builder['_identity'];
+                     else{
+                          if(!isset($builder['_ids'])) $builder['_ids']=[];
+                          $builder['_ids']=array_merge($builder['_ids'],$builder['_identity']);
+                     }
+                        unset($builder['_identity']);
+                 }
+                  if(isset($builder['_labels'])) { 
+                        $payload['labels']=$builder['_labels'];
+                        unset($builder['_labels']);
+                 }
+                  if(isset($builder['_type'])) { 
+                        $payload['type']= in_array($builder['_type'], array("action", "error", "email"))?$builder['_type']:"";;
+                        unset($builder['_type']);
+                 }
+                  if(isset($builder['_event'])) { 
+                        $payload['event']=$builder['_event'];
+                        unset($builder['_event']);
+                 } 
             }
             empty($builder)?$builder=[]:"";
             $payload['context']=$builder;
