@@ -209,7 +209,7 @@ class CompassApi {
                         unset($builder['_labels']);
                  }
                   if(isset($builder['_type'])) { 
-                        $payload['type']= in_array($builder['_type'], array("action", "error", "email"))?$builder['_type']:"";;
+                        $payload['type']= in_array($builder['_type'], array("action", "error", "email","identify","support","revenue"))?$builder['_type']:"";;
                         unset($builder['_type']);
                  }
                   if(isset($builder['_event'])) { 
