@@ -51,6 +51,13 @@ class CompassApi {
      */
     private $secure = false;
 
+        
+    /**
+     * If this is on the curl request is not executed
+     * @var Boolean
+     */
+    private $dry_run=false;
+    
     /**
      * Your developer private api key
      * !used for read operations
@@ -153,6 +160,7 @@ class CompassApi {
         if(isset($confs['public_key'])) self::$instance->setPublicKey($confs['public_key']);
         if(isset($confs['version'])) self::$instance->setVersion($confs['version']);
         if(isset($confs['debug'])) self::$instance->setDebug($confs['debug']);
+         if(isset($confs['dry_run'])) self::$instance->setDryRun($confs['dry_run']);
     }
     
 
@@ -166,6 +174,17 @@ class CompassApi {
         return $this;
     }
 
+    
+        /**
+     * Setter for dry run flag
+     * @param string $v
+     * @return Compass
+     */
+    public function setDryRun($v = "") {
+        $this->dry_run = $v;
+        return $this;
+    }
+    
     /**
      * Setter for  the output format 
      * @param string $format
@@ -318,7 +337,7 @@ class CompassApi {
            // curl_setopt($curl_handle, CURLOPT_TIMEOUT_MS, 100);
         }
       
-         $response = curl_exec($curl_handle);   
+            if(!$this->dry_run)  $response = curl_exec($curl_handle);   
         
          $info = curl_getinfo($curl_handle, CURLINFO_HTTP_CODE);
          //print_r($info);die();
